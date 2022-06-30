@@ -11,7 +11,7 @@ class lane_changing:
         l (int): road lenght
     """
 
-    def __init__(self, params, y_A):
+    def __init__(self, params, y_A=None):
 
         self.m_values = np.array([0, 1, 2])
         self.a_values = np.array([0, 1, 2])
@@ -182,6 +182,59 @@ class lane_changing:
         m_opt = self.m_values[np.argmax(EU_MV)]
 
         return m_opt, EU_MV
+
+    def simulate(self, theta):
+
+        results = {}
+
+        p  = ( theta*np.array([1. - self.mean_prob_correct_sensor , self.mean_prob_correct_sensor ]) + 
+        (1.-theta)*np.array([self.mean_prob_correct_sensor , 1. - self.mean_prob_correct_sensor    ]) )
+
+
+        self.y_A = 0
+        a_opt_0, _    = self.optimal_action_A()
+        
+        self.y_A = 1
+        a_opt_1, _    = self.optimal_action_A()
+
+        self.y_A = 0
+        m_opt_00, _    = self.optimal_action_MV(a_opt_0)
+        m_opt_01, _    = self.optimal_action_MV(a_opt_1)
+
+        self.y_A = 1
+        m_opt_10, _    = self.optimal_action_MV(a_opt_0)
+        m_opt_11, _    = self.optimal_action_MV(a_opt_1)
+
+
+        prob_s_def    = ( p[0]*p[0] * self.prob_s[theta, a_opt_0, m_opt_00,:] +
+                          p[0]*p[1] * self.prob_s[theta, a_opt_0, m_opt_10,:] +
+                          p[1]*p[0] * self.prob_s[theta, a_opt_1, m_opt_01,:] +
+                          p[1]*p[1] * self.prob_s[theta, a_opt_1, m_opt_11,:] )
+
+
+        results["prob_sensor_00"] = p[0]*p[0]
+        results["prob_sensor_01"] = p[0]*p[1]
+        results["prob_sensor_10"] = p[1]*p[0]
+        results["prob_sensor_11"] = p[1]*p[1]
+        results["a_opt_0"]       = a_opt_0
+        results["a_opt_1"]       = a_opt_1
+        ##
+        results["m_opt_00"]       = m_opt_00
+        results["m_opt_01"]       = m_opt_01
+        results["m_opt_10"]       = m_opt_10
+        results["m_opt_11"]       = m_opt_11
+        results["prob_s"]         = prob_s_def
+
+        return results
+
+
+
+
+
+
+
+
+
         
         
 

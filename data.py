@@ -4,7 +4,7 @@ import pandas as pd
 #s0 major accident
 #s1 minor accident
 #s2 safely executed interaction
-#s3 minor accident
+#s3 pedestrian casualty
 
 #a0 change lane
 #a1 remain 
@@ -14,8 +14,14 @@ import pandas as pd
 #m1 deccelerate
 #m2 change lane
 
-def build_params(theta2, theta3, theta4):
-  
+# c1 Internal inj. c2 Internal fat. c3 Internal damage. c4 Ext inj. 
+# c5 ext fat. c6 Ext damage. c7 Pedestrians. c8 Speed 
+
+
+def build_params(theta2, theta3, theta4, rho_A, rho_MV,
+                 weights_A=np.array([5/100, 25/100, 0, 5/100, 25/100, 0, 25/100, 15/100]) ,
+                 weights_MV=np.array([0.1, 0.5, 0.05, 0.35])):
+
     a_values = np.array([0, 1, 2])
     m_values = np.array([0, 1, 2])
 
@@ -41,7 +47,7 @@ def build_params(theta2, theta3, theta4):
     #                         [0., 0., 0., 0., 0., 0., theta4, 0.]      
     #                         ])
 
-    kk = 0.1
+    kk = 0.01
     consequences_A = np.array([ 
                             [0., theta2, 1., 0., theta3, 1., 0., 0.],
                             [0., theta2, 1., 0., theta3, 1., 0., 0.],
@@ -59,6 +65,21 @@ def build_params(theta2, theta3, theta4):
 
     consequences_df_A = pd.DataFrame(consequences_A, index = index)
 
+    # consequences_MV = np.array([ 
+    #                             [0., theta3, 1.,  0.],
+    #                             [0., theta3, 1.,  0.],
+    #                             [0., theta3, 1.,  0.],
+    #                             [theta3, 0., 0.5, 0.],
+    #                             [theta3, 0., 0.5, 0.],
+    #                             [theta3, 0., 0.5, 0.],
+    #                             [0.,     0., 0.,  -1.],
+    #                             [0.,     0., 0.,  -0.5],
+    #                             [0.,     0., 0.,  0.],
+    #                             [0.,     0., 0.,  0.],
+    #                             [0.,     0., 0.,  0.],
+    #                             [0.,     0., 0.,  0.]
+    #                         ])
+    kk_MV = 0.001
     consequences_MV = np.array([ 
                                 [0., theta3, 1.,  0.],
                                 [0., theta3, 1.,  0.],
@@ -71,7 +92,7 @@ def build_params(theta2, theta3, theta4):
                                 [0.,     0., 0.,  0.],
                                 [0.,     0., 0.,  0.],
                                 [0.,     0., 0.,  0.],
-                                [0.,     0., 0.,  0.]
+                                [-kk_MV*theta3, -kk_MV*theta3, -kk_MV*1.0,  0.]
                             ])
 
     consequences_df_MV = pd.DataFrame(consequences_MV, index = index)
@@ -96,13 +117,13 @@ def build_params(theta2, theta3, theta4):
     params["mean_prob_correct_sensor"] = 0.95
 
     params["consequences_MV"] = consequences_df_MV
-    params["weights_MV"]      = np.array([0.6, 0.3, 0.05, 0.05])
-    params["rho_MV"]          = 0.6
+    params["weights_MV"]      = weights_MV
+    params["rho_MV"]          = rho_MV
 
 
     params["consequences_A"] = consequences_df_A
-    params["weights_A"] = np.array([0.2, 0.2, 0.0, 0.2, 0.2, 0.0, 0.1, 0.1]) 
-    params["rho_A"] = 0.6
+    params["weights_A"] = weights_A
+    params["rho_A"] = rho_A
 
 
     params["k"] = 100 #controls variance of beta and dirichlet

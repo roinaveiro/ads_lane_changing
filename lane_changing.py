@@ -13,10 +13,9 @@ class lane_changing:
 
     def __init__(self, params, y_A=None):
 
-        self.m_values = np.array([0, 1, 2])
-        self.a_values = np.array([0, 1, 2])
-        self.states = np.array([0, 1, 2, 3])
-
+        self.m_values = params["m_values"] 
+        self.a_values = params["a_values"] 
+        self.states   = params["s_values"] 
 
 
         self.y_A = y_A

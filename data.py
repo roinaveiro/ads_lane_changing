@@ -24,12 +24,14 @@ def build_params(theta2, theta3, theta4, rho_A, rho_MV,
 
     a_values = np.array([0, 1, 2])
     m_values = np.array([0, 1, 2])
+    s_values = np.array([0, 1, 2, 3, 4])
 
     # theta2 = 4.0 # People die in ADS
     # theta3 = 4.0 # People die in MV 
     # theta4 = 0.0 # Pedestrians die 
 
-    tuples =  [(0, 0),(0, 1),(0, 2),(1, 0),(1, 1),(1, 2),(2, 0),(2, 1),(2, 2),(3, 0),(3, 1),(3, 2)]
+    tuples =  [(0, 0),(0, 1),(0, 2),(1, 0),(1, 1),(1, 2),(2, 0),(2, 1),(2, 2),(3, 0),(3, 1),
+      (3, 2), (4, 0),(4, 1),(4, 2)]
     index = pd.MultiIndex.from_tuples(tuples, names=["State", "Action"])
 
     # consequences_A = np.array([ 
@@ -47,7 +49,7 @@ def build_params(theta2, theta3, theta4, rho_A, rho_MV,
     #                         [0., 0., 0., 0., 0., 0., theta4, 0.]      
     #                         ])
 
-    kk = 0.01
+    kk = 0.0
     consequences_A = np.array([ 
                             [0., theta2, 1., 0., theta3, 1., 0., 0.],
                             [0., theta2, 1., 0., theta3, 1., 0., 0.],
@@ -60,7 +62,10 @@ def build_params(theta2, theta3, theta4, rho_A, rho_MV,
                             [0., 0., 0., 0., 0., 0., 0., 0.],
                             [-kk*theta2, -kk*theta2, -kk*1., -kk*theta3, -kk*theta3, -kk*1.0, theta4, 0.],
                             [-kk*theta2, -kk*theta2, -kk*1., -kk*theta3, -kk*theta3, -kk*1.0, theta4, 0.],
-                            [-kk*theta2, -kk*theta2, -kk*1., -kk*theta3, -kk*theta3, -kk*1.0, theta4, 0.]     
+                            [-kk*theta2, -kk*theta2, -kk*1., -kk*theta3, -kk*theta3, -kk*1.0, theta4, 0.], 
+                            [theta2, 0., 0.5, 0., 0., 0.0, theta4, 0.],
+                            [theta2, 0., 0.5, 0., 0., 0.0, theta4, 0.],
+                            [theta2, 0., 0.5, 0., 0., 0.0, theta4, 0.]
                             ])
 
     consequences_df_A = pd.DataFrame(consequences_A, index = index)
@@ -90,29 +95,36 @@ def build_params(theta2, theta3, theta4, rho_A, rho_MV,
                                 [0.,     0., 0.,  -1.],
                                 [0.,     0., 0.,  -0.5],
                                 [0.,     0., 0.,  0.],
+                                [0.,     0., 0.,  -1.],
+                                [0.,     0., 0.,  -0.5],
                                 [0.,     0., 0.,  0.],
-                                [0.,     0., 0.,  0.],
-                                [-kk_MV*theta3, -kk_MV*theta3, -kk_MV*1.0,  0.]
+                                [0.,     0., 0.,  -1.],
+                                [0.,     0., 0.,  -0.5],
+                                [0.,     0., 0.,  0.]
                             ])
 
     consequences_df_MV = pd.DataFrame(consequences_MV, index = index)
 
     prob_s = np.array([
                       [
-                        [ [2/3,1/6,1/6,0.], [1/6,1/6,2/3,0.], [1/24,1/24,11/12,0.] ],
-                        [ [0., 0., 1., 0.], [0., 0., 1., 0.], [1/3, 1/3, 1/3,  0.] ], 
-                        [ [0., 0., 0., 1.], [0., 0., 0., 1.], [0.,  0.,  0.,   1.] ]
+                        [ [2/3,1/6,1/6,0.,0.], [1/6,1/6,2/3,0.,0.], [1/24,1/24,11/12,0.,0.] ],
+                        [ [0., 0., 0.95, 0., 0.05], [0., 0., 0.95, 0., 0.05], [1/3, 1/3, 1/3,  0., 0.] ], 
+                        [ [0., 0., 0., 1., 0.], [0., 0., 0., 1.,0.], [0.,  0.,  0.,   1.,0.] ]
                       ],
                       [
-                        [ [5/6,1/8,1/24,0.], [1/3,1/3,1/3,0.], [1/3,1/3,1/3,0.] ],
-                        [ [0., 0., 1.,  0.], [0., 0., 1., 0.], [2/3,1/3,0., 0.] ], 
-                        [ [0., 0., 0.,  1.], [0., 0., 0., 1.], [0.,  0.,0., 1.] ]
+                        [ [5/6,1/8,1/24,0.,0.], [1/3,1/3,1/3,0.,0.], [1/3,1/3,1/3,0.,0.] ],
+                        [ [0., 0., 0.7,  0., 0.3], [0., 0., 0.7, 0., 0.3], [2/3,1/3, 0., 0., 0.] ], 
+                        [ [0., 0., 0.,  1., 0.], [0., 0., 0., 1., 0.], [0.,  0., 0., 1., 0.] ]
                       ]
                       ])
 
 
 
     params = {}
+    params["a_values"] = a_values
+    params["m_values"] = m_values
+    params["s_values"] = s_values
+
     params["prob_s"] = prob_s
     params["mean_prob_correct_sensor"] = 0.95
 
